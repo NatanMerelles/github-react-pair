@@ -20,42 +20,71 @@ const Body = styled.main`
   gap: 10px;
 `;
 
-const Repo = styled.div`
+const RepoStyling = styled.div`
   width: 100px;
   padding: 20px;
   border: 1px solid #b3b3b3;
   border-radius: 25px;
 `;
 
+const Link = styled.a`
+  text-decoration: none;
+  color: #33a3d4;
+  font-size: 16px;
+`;
+
+function Repo({
+  name,
+  url
+}){
+  return(
+    <RepoStyling>
+      <Link href={url} target="_blank">
+        Repositorio: {name}
+      </Link>
+    </RepoStyling>         
+  )
+}
+
 function App() {
   const [profile, setProfile] = useState();
   const [repos, setRepos] = useState([]);
+  const [dado, setDado] = useState('');
+
 
   useEffect(() => {
-    fetch('https://api.github.com/users/natanmerelles')
-      .then((result) => result.json())
-      .then((dados) => setProfile(dados));
-  }, []);
-
-  useEffect(() => {
-    if (profile) {
+    if (profile && profile.repos_url) {
       fetch(profile.repos_url)
         .then((result) => result.json())
         .then((dados) => setRepos(dados));
+    }else{
+      setRepos([])
     }
   }, [profile]);
 
-  console.log({ profile });
-  console.log({ repos });
+  
+
+  function handleDado(e){
+    setDado(e.target.value)
+  }
+
+  function handleBuscar(){
+    fetch(`https://api.github.com/users/${dado}`)
+      .then((result) => result.json())
+      .then((dados) => setProfile(dados));
+  }
 
   return (
     <div className="App">
-      <Header></Header>
+      <Header>
+        <input type="text" placeholder="Dado" value={dado} onChange={handleDado}></input>
+        <button onClick={handleBuscar}>Buscar</button>
+      </Header>
       <Body>
         {profile ? profile.login : 'Um nome'}
         {
           repos.map((repo) => (
-            <Repo>{repo.name}</Repo>
+            <Repo name={repo.name} url={repo.html_url}/>
           ))
         }
       </Body>
